@@ -1,5 +1,6 @@
 # TODO List
 
+- Fix regex to exclude double single quotes (''Romeo...)
 - Enable directory input: use aggregate data from all lyrics files in directory
 - Add options, let user specify -i option to automatically retrieve songs via
   search on metrolyrics (need to write scrape.py module for this)
@@ -13,3 +14,4 @@
 - Allow user to specify n-gram config (default: bigram, or based on source data
   size?)
   * Try linear interpolation or backoff
+- Allow user to specify song structure
