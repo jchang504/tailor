@@ -1,6 +1,9 @@
 # TODO List
 
 - Fix regex to exclude double single quotes (''Romeo...)
+- Check if punctuation tokens are being handled properly in output; if we just
+  ' '.join, there will be extra space between the previous word and punctuation
+- Abstract hard-coded unigram and bigram collection to arbitrary n-gram
 - Enable directory input: use aggregate data from all lyrics files in directory
 - Add options, let user specify -i option to automatically retrieve songs via
   search on metrolyrics (need to write scrape.py module for this)
