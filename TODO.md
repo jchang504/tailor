@@ -1,10 +1,13 @@
 # TODO List
 
+- Finish usage help messages for options and abstract arg processing to
+  function
+- Fix I/i collection - being counted separately when I is first or in middle of
+  line
 - Fix regex to exclude double single quotes (''Romeo...)
-- Check if punctuation tokens are being handled properly in output; if we just
-  ' '.join, there will be extra space between the previous word and punctuation
+- Fix naive joining of tokens (' '.join) to account for punctuation
 - Abstract hard-coded unigram and bigram collection to arbitrary n-gram
-- Enable directory input: use aggregate data from all lyrics files in directory
+- Have two input modes: either raw lyrics (unprocessed) or output of process.py
 - Add options, let user specify -i option to automatically retrieve songs via
   search on metrolyrics (need to write scrape.py module for this)
 - Add line length tuning to prevent very short and very long lines
