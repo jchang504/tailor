@@ -1,5 +1,7 @@
+'''Process raw lyrics text files into dictionaries containing all the data
+needed to generate new songs.
+'''
 import re
-
 from collections import Counter
 
 LYRICS_TOKEN_REGEX = re.compile(r"([\w'-:]+|[?!,;.]+)")
@@ -117,6 +119,11 @@ def count_bigram(bigram, bigrams_map):
         counter[second_word] += 1
 
 def frequency_dict_from_counter(counter):
+    '''Maps a counter to a frequency dictionary.
+
+    The result dictionary has the same keys as the counter, but the values are
+    the counts divided by the total of all counts.
+    '''
     counts_total = sum(counter.values())
     frequencies = {}
 
