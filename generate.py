@@ -1,3 +1,6 @@
+'''Generate song lyrics with an N-gram model based on data extracted from
+existing lyrics.
+'''
 import argparse
 import os
 import random
@@ -13,7 +16,7 @@ N_GRAM_SIZE_INVALID_MESSAGE = 'N-gram size must be a positive integer'
 
 def collect_files(path_list, recursive):
     '''Collect the list of filenames specified by the given paths.
-    
+
     Given a list of paths from the command line, returns a list of the all the
     filenames either directly specified as a path or contained in a directory
     specified as a path. If recursive is True, recursively searches into
@@ -83,7 +86,7 @@ def create_song(frequency_data, structure):
 
     for section in structure:
         if section not in song_parts:
-            song_parts[section] = create_section(frequency_data[BIGRAMS], 
+            song_parts[section] = create_section(frequency_data[BIGRAMS],
                     sample_from_frequencies(lpv_frequencies))
 
     return '\n\n'.join(['[%s]\n%s' % (section, song_parts[section]) for section
@@ -130,7 +133,7 @@ def get_cl_args():
 
 def positive_int(string):
     '''Convert a string to a positive int.
-    
+
     A value for the type argument of argparse.ArgumentParser.add_argument. If
     not possible to convert, throws ArgumentTypeError'''
     try:
@@ -191,5 +194,5 @@ if __name__ == '__main__':
     lyrics_data = [process.collect_data(lyrics) for lyrics in lyrics_texts]
     aggregate_data = process.aggregate_data(lyrics_data)
     frequencies = process.compute_frequencies(aggregate_data)
-            
+
     print create_song(frequencies, args.song_form)

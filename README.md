@@ -12,9 +12,9 @@ implement them to [`TODO.md`](/TODO.md)!
 ## Usage
 
 ```
-usage: tailor.py [-h] [-n N_GRAM_SIZE] [-p] [-r] [-s]
-                 [-f SONG_SECTION [SONG_SECTION ...]]
-                 lyrics_files [lyrics_files ...]
+usage: generate.py [-h] [-n N_GRAM_SIZE] [-p] [-r] [-s]
+                   [-f SONG_SECTION [SONG_SECTION ...]]
+                   lyrics_files [lyrics_files ...]
 
 Generate song lyrics from an N-gram language model
 

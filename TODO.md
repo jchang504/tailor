@@ -10,6 +10,7 @@
 - Fix naive joining of tokens (' '.join) to account for punctuation
 
 ## Features
+- Auto-generation of README.md with updated Usage section (on commit)
 - Abstract hard-coded unigram and bigram collection and generation to arbitrary
   n-gram
 - Allow user to specify n-gram config (default: bigram, or based on source data
