@@ -4,8 +4,16 @@ needed to generate new songs.
 import re
 from collections import Counter
 
-LYRICS_TOKEN_REGEX = re.compile(r"([\w'-:]+|[?!,;.]+)")
-PAREN_PHRASES_REGEX = re.compile(r'\(.*\)')
+# Regexes for tokenization
+CONTRACTION_OR_HYPHENATED_WORD_PATTERN = r"(?:\w+['-]\w+)"
+DIGITAL_TIME_PATTERN = r'(?:\d{1,2}:\d{2})'
+SIMPLE_WORD_PATTERN = r'(?:\w+)'
+PUNCTUATION_PATTERN = r'(?:[,;:.?!"-]+)'
+LYRICS_TOKEN_REGEX = re.compile('|'.join(
+        [CONTRACTION_OR_HYPHENATED_WORD_PATTERN, DIGITAL_TIME_PATTERN,
+        SIMPLE_WORD_PATTERN, PUNCTUATION_PATTERN]))
+
+PAREN_PHRASES_REGEX = re.compile(r'\([^)]+\)')
 START_LINE_TOKEN = '<START>'
 END_LINE_TOKEN = '<END>'
 
@@ -151,7 +159,9 @@ def smart_uncapitalize(string):
 def tokenize(line):
     '''Split a line into tokens.
 
-    First remove (parenthesized phrases), then match strings of word or
-    punctuation characters.
+    First remove (parenthesized phrases) and replace '' with ", then tokenize
+    the rest according to a special regex sauce.
     '''
-    return LYRICS_TOKEN_REGEX.findall(PAREN_PHRASES_REGEX.sub('', line))
+    parens_removed = PAREN_PHRASES_REGEX.sub('', line)
+    double_single_quotes_replaced = parens_removed.replace("''", '"')
+    return LYRICS_TOKEN_REGEX.findall(double_single_quotes_replaced)

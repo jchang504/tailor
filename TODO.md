@@ -6,7 +6,6 @@
 - Handle invalid paths with an exception
 - Fix I/i collection - being counted separately when I is first or in middle of
   line
-- Fix regex to exclude double single quotes (''Romeo...)
 - Fix naive joining of tokens (' '.join) to account for punctuation
 
 ## Features
