@@ -7,6 +7,7 @@
 - Fix I/i collection - being counted separately when I is first or in middle of
   line
 - Fix naive joining of tokens (' '.join) to account for punctuation
+- Preserve capitalization of names
 
 ## Features
 - Auto-generation of README.md with updated Usage section (on commit)

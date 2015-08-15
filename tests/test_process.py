@@ -36,3 +36,25 @@ class TestTokenize:
     def test_replaces_double_single_quote_with_double_quote(self):
         assert_equal(p.tokenize("''This is a quote''"),
                 ['"', 'This', 'is', 'a', 'quote', '"'])
+        
+class TestSmartUncapitalize:
+
+    def test_uncapitalizes_simple_sentence(self):
+        assert_equal(p.smart_uncapitalize('Uncapitalize this sentence.'),
+                'uncapitalize this sentence.')
+
+    def test_does_not_uncapitalize_rest_of_sentence(self):
+        assert_equal(p.smart_uncapitalize('Uncapitalize this Sentence.'),
+                'uncapitalize this Sentence.')
+        
+    def test_does_not_uncapitalize_i(self):
+        assert_equal(p.smart_uncapitalize('I will not eat cereal for lunch.'),
+                'I will not eat cereal for lunch.')  
+        
+    def test_does_not_uncapitalize_i_contraction(self):
+        assert_equal(p.smart_uncapitalize("I'll not eat cereal for lunch."),
+                "I'll not eat cereal for lunch.")  
+        
+    def test_does_not_uncapitalize_beyond_first_word(self):
+        assert_equal(p.smart_uncapitalize('15:00 is the time in London.'),
+                '15:00 is the time in London.')
