@@ -7,7 +7,7 @@ import random
 import sys
 
 import process
-from process import BIGRAMS, LINES_PER_VERSE, TOKENS_PER_LINE
+from process import NGRAMS, LINES_PER_VERSE, TOKENS_PER_LINE
 from process import START_LINE_TOKEN, END_LINE_TOKEN
 
 COMMON_POP_SONG_STRUCTURE = ['Verse 1', 'Chorus', 'Verse 2', 'Chorus',
@@ -102,7 +102,7 @@ def get_cl_args():
             'by \\n and each verse separated by a blank line; or directories '
             'containing such files'))
 
-    arg_parser.add_argument('-n', '--n-gram-size', action='store',
+    arg_parser.add_argument('-n', '--ngram-size', action='store',
             type=positive_int, default=2, help=('Specify the maximum N-gram '
             'size to use when processing lyrics and generating the song. Note '
             'that preprocessed lyrics data might not contain N-gram data up '
@@ -184,15 +184,17 @@ if __name__ == '__main__':
 
     # TODO: remove below once options are implemented
     if (args.preprocessed_data or
-            args.n_gram_size != 2):
+            args.ngram_size != 2):
         print '-n, -p, options not supported yet'
         sys.exit(1)
 
     # TODO: wrap collect_files call in try and catch invalid path exception
     lyrics_texts = [read_file(filename) for filename in
             collect_files(args.lyrics_files, args.recursive)]
-    lyrics_data = [process.collect_data(lyrics) for lyrics in lyrics_texts]
+    lyrics_data = [process.collect_data(lyrics, args.ngram_size) for lyrics
+            in lyrics_texts]
     aggregate_data = process.aggregate_data(lyrics_data)
     frequencies = process.compute_frequencies(aggregate_data)
 
-    print create_song(frequencies, args.song_form)
+    # TODO: fix everything for changes in n-gram generalization in process.py
+    #print create_song(frequencies, args.song_form)

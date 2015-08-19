@@ -39,7 +39,7 @@ optional arguments:
   -r, --recursive       Recursively search input directories for files
   -s, --section-titles  Print the section title in brackets before each
                         section of the song
-  -f SONG_SECTION [SONG_SECTION ...], --song-form SONG_SECTION [SONG_SECTION ...]
+  -f SONG_SECTION [MORE_SECTIONS ...], --song-form SONG_SECTION [MORE ...]
                         Specify the structure of the song by listing the
                         section titles as arguments. Identical titles
                         represent sections that should be identical. Default:
@@ -57,3 +57,54 @@ development.
 
 Lastly, the greatest thanks to Ro-IT, a constant source of technical and
 general support, advice, and assistance. "Stay, stay, pay."
+
+## Development
+
+Developers should always follow this ideal workflow under normal circumstances.
+
+Before starting work:
+
+1. `git pull` to make sure your local repository is up-to-date.
+2. If starting work on a new feature/bug fix, create a new branch with a
+   descriptive name, e.g. `git checkout -b bug-fix-i-capitalization`. Else,
+   checkout and continue work on the branch you created. Do NOT work directly
+   on `master`.
+3. Scope out and list the work you intend to do on this branch in a file called
+   `delta`; include a hash comment starting with `BLOCKING TODO` (you can vary
+   capitalization if you like) so you don't forget to update `delta` before
+   committing.
+
+Before writing a new function:
+
+4. Write a stub for it, simply calling pass. Think through its specification
+   and write a descriptive docstring for it in the 3rd-person declarative mood.
+5. Write robust unit tests that validate its behavior in a `TestFunctionName`
+   class in the appropriate `test_module.py`.
+6. Run the unit tests and ensure they fail. If they don't fail, your unit tests
+   aren't working; fix them.
+
+When writing code:
+
+7. Follow standard Python style conventions and keep lines < 80 characters.
+8. Whenever you change something that must be added, removed, or changed back
+   before committing, add a comment starting with `BLOCKING TODO` so you don't
+   forget.
+9. Run unit tests frequently to validate your code.
+
+Before committing and pushing:
+
+10. Edit `delta` to reflect the changes you made. Format it as a Git commit
+    message, in the imperative mood, with a single line short summary as the
+    first line, then a blank line, then a longer message. This file will be
+    used as the commit message.
+11. Do NOT use regular `git commit`. Instead, when you're ready to commit, run
+    `bash safe_commit.sh` from the git repo directory. This script checks for
+    blocking TODO comments, lines longer than 79 characters, and runs the unit
+    tests before committing.
+12. Once the commit succeeds, `git push`!
+
+When done with a feature/bug fix:
+
+13. Submit a pull request to merge the feature/bug fix branch into `master`.
+14. Iterate on comments/reviews and make any necessary changes.
+15. When everything is resolved, merge to `master`!

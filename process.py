@@ -18,53 +18,66 @@ START_LINE_TOKEN = '<START>'
 END_LINE_TOKEN = '<END>'
 
 # Data dictionary keys
-UNIGRAMS = 'uni'
-BIGRAMS = 'bi'
+NGRAMS = 'ngrams'
 LINES_PER_VERSE = 'lpv'
 TOKENS_PER_LINE = 'tpl'
+
+def add_ngram_dict(accum_dict, add_dict, n):
+    '''Add the n-gram counts in add_dict to those in accum_dict.
+
+    Recursively walk down the nested dictionaries to add their Counters
+    together properly. This mutates accum_dict but not add_dict.
+    '''
+    if n == 1: # At last level, dicts are Counters
+        accum_dict += add_dict
+
+    else:
+        for token, next_add in add_dict.iteritems():
+            next_accum = accum_dict.get(token)
+
+            if next_accum is None:
+                accum_dict[token] = (Counter if n == 2 else dict)(next_add)
+            else:
+                add_ngram_dict(next_accum, next_add, n-1)
 
 def aggregate_data(lyrics_data_list):
     '''Aggregate data about multiple songs' lyrics.
 
     Given a list of data dictionaries of the form returned by collect_data,
     combines the data into a single dictionary of the same form by adding
-    Counters together.
+    Counters together. The NGRAMS list will be truncated to the length of the
+    shortest NGRAMS list among the input data.
     '''
-    total_unigrams = Counter()
-    total_bigrams = {} # string -> Counter(string -> int)
+    n = min([len(lyrics_data[NGRAMS])-1 for lyrics_data in lyrics_data_list])
+    total_ngrams = [None, Counter()] + [{} for i in xrange(n-1)]
     total_lines_per_verse = Counter()
     total_tokens_per_line = Counter()
 
     for lyrics_data in lyrics_data_list:
-        total_unigrams += lyrics_data[UNIGRAMS]
-        total_lines_per_verse += lyrics_data[LINES_PER_VERSE]
-        total_tokens_per_line += lyrics_data[TOKENS_PER_LINE]
+        for i in xrange(1, n+1):
+            add_ngram_dict(total_ngrams[i], lyrics_data[NGRAMS][i], i)
 
-        bigrams = lyrics_data[BIGRAMS]
-        for first_word in bigrams:
-            counter = total_bigrams.get(first_word)
-            if counter is None: # First encounter of first_word
-                total_bigrams[first_word] = bigrams[first_word]
-            else:
-                total_bigrams[first_word] = counter + bigrams[first_word]
+        total_lines_per_verse.update(lyrics_data[LINES_PER_VERSE])
+        total_tokens_per_line.update(lyrics_data[TOKENS_PER_LINE])
 
-    return {UNIGRAMS: total_unigrams, BIGRAMS: total_bigrams, LINES_PER_VERSE:
-            total_lines_per_verse, TOKENS_PER_LINE: total_tokens_per_line}
+    return {NGRAMS: total_ngrams, LINES_PER_VERSE: total_lines_per_verse,
+            TOKENS_PER_LINE: total_tokens_per_line}
 
-
-def collect_data(song_lyrics):
+def collect_data(song_lyrics, n):
     '''Collect data about a song's lyrics.
 
     Arguments:
     - song_lyrics: a string containing the song's lyrics, where each line is
         separated by \n, and each verse is separated by a blank line
-    Information collected:
-    - Count the unigrams and bigrams
-    - Frequency distribution of number of lines per verse
-    - Frequency distribution of number of tokens per line
+    - n: the maximum size n-grams to collect counts for; minimum 1
+    Returns a dictionary with these keys and values:
+    - NGRAMS: a list where index n contains a nested dictionary mapping n-grams
+      to their counts (e.g. {'a': {'trigram': {'dictionary': 1} } }); index 0
+      is None
+    - LINES_PER_VERSE: a Counter representing the distribution of verse lengths
+    - TOKENS_PER_LINE: a Counter representing the distribution of line lengths
     '''
-    unigrams = Counter()
-    bigrams = {} # string -> Counter(string -> int)
+    ngrams = [None, Counter()] + [{} for i in xrange(n-1)]
     lines_per_verse = Counter()
     tokens_per_line = Counter()
 
@@ -76,14 +89,11 @@ def collect_data(song_lyrics):
 
         if len_tokens > 0:
             for i in xrange(len_tokens):
-                unigrams[tokens[i]] += 1
-
-                if i == 0: # First token: count START bigram
-                    count_bigram((START_LINE_TOKEN, tokens[i]), bigrams)
-                if i < len_tokens - 1: # Not last token of line: count bigram
-                    count_bigram((tokens[i], tokens[i+1]), bigrams)
-                else: # Last token: count END bigram
-                    count_bigram((tokens[i], END_LINE_TOKEN), bigrams)
+                for size in xrange(1, n+1):
+                    if i <= len_tokens - size:
+                        count_ngram(ngrams[size], i, size, tokens)
+                    else:
+                        break # Larger sizes won't fit either
 
             tokens_per_line[len_tokens] += 1
             current_lines += 1
@@ -92,41 +102,45 @@ def collect_data(song_lyrics):
             lines_per_verse[current_lines] += 1
             current_lines = 0
 
-    return {UNIGRAMS: unigrams, BIGRAMS: bigrams, LINES_PER_VERSE:
-            lines_per_verse, TOKENS_PER_LINE: tokens_per_line}
+    return {NGRAMS: ngrams, LINES_PER_VERSE: lines_per_verse, TOKENS_PER_LINE:
+            tokens_per_line}
 
-def compute_frequencies(lyrics_data):
-    '''Compute frequency distributions for some lyrics data.
+def lyrics_data_to_frequencies(lyrics_data):
+    '''Maps a lyrics data dictionary holding counts to one holding frequencies.
 
     Given a data dictionary of the form returned by collect_data, returns a
-    data dictionary with the same keys, but counts converted to probabilities.
+    data dictionary with the same keys, but counts converted to relative
+    frequencies.
     '''
-    unigram_frequencies = frequency_dict_from_counter(lyrics_data[UNIGRAMS])
-    bigram_frequencies = {first_word: frequency_dict_from_counter(counter) for
-            first_word, counter in lyrics_data[BIGRAMS].iteritems()}
-    lpv_frequencies = frequency_dict_from_counter(lyrics_data[LINES_PER_VERSE])
-    tpl_frequencies = frequency_dict_from_counter(lyrics_data[TOKENS_PER_LINE])
+    n = len(lyrics_data[NGRAMS])-1
+    ngram_frequencies = [None] + [ngram_counts_to_frequencies(
+            lyrics_data[NGRAMS][i], i) for i in xrange(1, n+1)]
 
-    return {UNIGRAMS: unigram_frequencies, BIGRAMS: bigram_frequencies,
-            LINES_PER_VERSE: lpv_frequencies, TOKENS_PER_LINE: tpl_frequencies}
+    lpv_frequencies = counter_to_frequency_dict(lyrics_data[LINES_PER_VERSE])
+    tpl_frequencies = counter_to_frequency_dict(lyrics_data[TOKENS_PER_LINE])
 
-def count_bigram(bigram, bigrams_map):
-    '''Count an occurrence of bigram in bigrams_map.
+    return {NGRAMS: ngram_frequencies, LINES_PER_VERSE: lpv_frequencies,
+            TOKENS_PER_LINE: tpl_frequencies}
 
-    Arguments:
-    bigram - a tuple of strings (first_word, second_word) representing a bigram
-    bigrams_map - a dictionary mapping bigram first words to (Counters mapping
-            second words to counts)
+def count_ngram(ngram_dict, i, n, tokens):
+    '''Count the n-gram represented by tokens[i:i+n] in ngram_dict.
+
+    Recursively walk down the nested dictionaries to count an occurrence of the
+    n-gram starting at index i in tokens. Recursion is beautiful.
     '''
-    (first_word, second_word) = bigram
-    counter = bigrams_map.get(first_word)
+    if n == 1: # At last level, ngram_dict is a Counter
+        ngram_dict[tokens[i]] += 1
 
-    if counter is None: # First encounter of first_word
-        bigrams_map[first_word] = Counter({second_word: 1})
     else:
-        counter[second_word] += 1
+        token = tokens[i]
+        next_dict = ngram_dict.get(token)
 
-def frequency_dict_from_counter(counter):
+        if next_dict is None: # First encounter of word at this level
+            ngram_dict[token] = Counter() if n == 2 else {}
+        else:
+            count_ngram(next_dict, i+1, n-1, tokens)
+
+def counter_to_frequency_dict(counter):
     '''Maps a counter to a frequency dictionary.
 
     The result dictionary has the same keys as the counter, but the values are
@@ -139,6 +153,19 @@ def frequency_dict_from_counter(counter):
         frequencies[key] = float(counter[key]) / counts_total
 
     return frequencies
+
+def ngram_counts_to_frequencies(ngram_dict, n):
+    '''Maps an ngram_dict holding counts to one holding relative frequencies.
+
+    Recursively walk down the nested dictionaries and convert the Counters at
+    the last level to relative frequency dictionaries.
+    '''
+    if n == 1:
+        return counter_to_frequency_dict(ngram_dict)
+
+    else:
+        return {token: ngram_counts_to_frequencies(next_dict, n-1) for token,
+                next_dict in ngram_dict.iteritems()}
 
 def smart_uncapitalize(string):
     '''Uncapitalize a string correctly even if it begins with punctuation.

@@ -3,6 +3,7 @@
 ## Bug Fixes
 
 - Add testing
+- Make sure all docstrings use 3rd person declarative (after ngrams is merged)
 - Handle invalid paths with an exception
 - Fix I/i collection - being counted separately when I is first or in middle of
   line
