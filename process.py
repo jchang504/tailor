@@ -88,12 +88,9 @@ def collect_data(song_lyrics, n):
         len_tokens = len(tokens)
 
         if len_tokens > 0:
-            for i in xrange(len_tokens):
-                for size in xrange(1, n+1):
-                    if i <= len_tokens - size:
-                        count_ngram(ngrams[size], i, size, tokens)
-                    else:
-                        break # Larger sizes won't fit either
+            for size in xrange(1, n+1):
+                for i in xrange(1-size, len_tokens):
+                    count_ngram(ngrams[size], i, size, tokens, len_tokens)
 
             tokens_per_line[len_tokens] += 1
             current_lines += 1
@@ -104,6 +101,43 @@ def collect_data(song_lyrics, n):
 
     return {NGRAMS: ngrams, LINES_PER_VERSE: lines_per_verse, TOKENS_PER_LINE:
             tokens_per_line}
+
+def count_ngram(ngram_dict, i, n, tokens, len_tokens):
+    '''Count the n-gram represented by tokens[i:i+n] in ngram_dict.
+
+    Recursively walk down the nested dictionaries to count an occurrence of the
+    n-gram starting at index i in tokens. Recursion is beautiful.
+    '''
+    if i < 0:
+        token = START_LINE_TOKEN
+    elif i >= len_tokens:
+        token = END_LINE_TOKEN
+    else:
+        token = tokens[i]
+
+    if n == 1: # At last level, ngram_dict is a Counter
+        ngram_dict[token] += 1
+
+    else:
+        next_dict = ngram_dict.get(token)
+        if next_dict is None: # First encounter of this token at this level
+            ngram_dict[token] = next_dict = Counter() if n == 2 else {}
+
+        count_ngram(next_dict, i+1, n-1, tokens, len_tokens)
+
+def counter_to_frequency_dict(counter):
+    '''Maps a counter to a frequency dictionary.
+
+    The result dictionary has the same keys as the counter, but the values are
+    the counts divided by the total of all counts.
+    '''
+    counts_total = sum(counter.values())
+    frequencies = {}
+
+    for key in counter:
+        frequencies[key] = float(counter[key]) / counts_total
+
+    return frequencies
 
 def lyrics_data_to_frequencies(lyrics_data):
     '''Maps a lyrics data dictionary holding counts to one holding frequencies.
@@ -122,38 +156,6 @@ def lyrics_data_to_frequencies(lyrics_data):
     return {NGRAMS: ngram_frequencies, LINES_PER_VERSE: lpv_frequencies,
             TOKENS_PER_LINE: tpl_frequencies}
 
-def count_ngram(ngram_dict, i, n, tokens):
-    '''Count the n-gram represented by tokens[i:i+n] in ngram_dict.
-
-    Recursively walk down the nested dictionaries to count an occurrence of the
-    n-gram starting at index i in tokens. Recursion is beautiful.
-    '''
-    if n == 1: # At last level, ngram_dict is a Counter
-        ngram_dict[tokens[i]] += 1
-
-    else:
-        token = tokens[i]
-        next_dict = ngram_dict.get(token)
-
-        if next_dict is None: # First encounter of word at this level
-            ngram_dict[token] = Counter() if n == 2 else {}
-        else:
-            count_ngram(next_dict, i+1, n-1, tokens)
-
-def counter_to_frequency_dict(counter):
-    '''Maps a counter to a frequency dictionary.
-
-    The result dictionary has the same keys as the counter, but the values are
-    the counts divided by the total of all counts.
-    '''
-    counts_total = sum(counter.values())
-    frequencies = {}
-
-    for key in counter:
-        frequencies[key] = float(counter[key]) / counts_total
-
-    return frequencies
-
 def ngram_counts_to_frequencies(ngram_dict, n):
     '''Maps an ngram_dict holding counts to one holding relative frequencies.
 
@@ -166,6 +168,11 @@ def ngram_counts_to_frequencies(ngram_dict, n):
     else:
         return {token: ngram_counts_to_frequencies(next_dict, n-1) for token,
                 next_dict in ngram_dict.iteritems()}
+
+def read_file(filename):
+    '''Read the full text of a file.'''
+    with open(filename) as f:
+        return f.read()
 
 def smart_uncapitalize(string):
     '''Uncapitalize a string correctly even if it begins with punctuation.

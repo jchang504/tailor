@@ -91,20 +91,26 @@ When writing code:
    forget.
 9. Run unit tests frequently to validate your code.
 
+After writing/changing a function:
+
+10. Update its docstring. You may have changed its signature, argument names,
+    etc. while implementing it.
+11. Run the unit test class for the function and verify that it passes.
+
 Before committing and pushing:
 
-10. Edit `delta` to reflect the changes you made. Format it as a Git commit
+12. Edit `delta` to reflect the changes you made. Format it as a Git commit
     message, in the imperative mood, with a single line short summary as the
     first line, then a blank line, then a longer message. This file will be
     used as the commit message.
-11. Do NOT use regular `git commit`. Instead, when you're ready to commit, run
+13. Do NOT use regular `git commit`. Instead, when you're ready to commit, run
     `bash safe_commit.sh` from the git repo directory. This script checks for
     blocking TODO comments, lines longer than 79 characters, and runs the unit
     tests before committing.
-12. Once the commit succeeds, `git push`!
+14. Once the commit succeeds, `git push`!
 
 When done with a feature/bug fix:
 
-13. Submit a pull request to merge the feature/bug fix branch into `master`.
-14. Iterate on comments/reviews and make any necessary changes.
-15. When everything is resolved, merge to `master`!
+15. Submit a pull request to merge the feature/bug fix branch into `master`.
+16. Iterate on comments/reviews and make any necessary changes.
+17. When everything is resolved, merge to `master`!

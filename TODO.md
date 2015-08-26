@@ -25,5 +25,6 @@
   * How to avoid long lines? May not be necessary, doesn't happen too often,
     and may happen even less with more source data
 - Try higher n-grams with linear interpolation or backoff to improve coherency
+- Title generation
 - Let user specify -i option to automatically retrieve songs via
   search on metrolyrics (need to write scrape.py module for this)
