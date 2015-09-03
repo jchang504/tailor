@@ -7,6 +7,27 @@ from nose.tools import (assert_equal, assert_not_equal, assert_true,
 
 import tailor.process as p
 
+class TestAddNgramDict:
+
+    def setup(self):
+        self.unigram_base = Counter({0: 1, 1: 1})
+        self.unigram_add = Counter({0: 1, 2: 1})
+        self.bigram_base = {0: Counter({1: 1, 2: 1}), 1: Counter({0: 1})}
+        self.bigram_add = {0: Counter({1: 1, 3: 1}), 2: Counter({0: 1})}
+
+    def test_adds_unigram_dict(self):
+        p.add_ngram_dict(self.unigram_base, self.unigram_add, 1)
+        expected = Counter({0: 2, 1: 1, 2: 1})
+        assert_equal(self.unigram_base, expected)
+
+    def test_adds_bigram_dict(self):
+        p.add_ngram_dict(self.bigram_base, self.bigram_add, 2)
+        expected = {0: Counter({1: 2, 2: 1, 3: 1}), 1: Counter({0: 1}), 2:
+                Counter({0: 1})}
+        assert_equal(self.bigram_base, expected)
+        # Test new dict value is a copy, not an alias of the add dict
+        assert_is_not(self.bigram_base[2], self.bigram_add[2])
+
 class TestCountNgram:
 
     tokens = [0, 1, 2, 3]

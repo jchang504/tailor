@@ -14,8 +14,6 @@
 - Auto-generation of README.md with updated Usage section (on commit)
 - Abstract hard-coded unigram and bigram collection and generation to arbitrary
   n-gram
-- Allow user to specify n-gram config (default: bigram, or based on source data
-  size?)
 - Implement -p (preprocessed data) input mode
 - Add line length tuning to prevent very short and very long lines
   * To avoid very short, after sampling bigram and getting <END>, actually end

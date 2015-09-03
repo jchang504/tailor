@@ -4,10 +4,10 @@ Tailor is a Python command-line tool for automatic generation of "original"
 song lyrics based on a collection of songs' lyrics.
 
 The current version supports multiple file and directory (with optional
-recursive search) input and song structure customization; it uses a
-bigram-based language model to generate the lyrics, and outputs to stdout.
-There are a lot more cool features to come, being added faster than I can
-implement them to [`TODO.md`](/TODO.md)!
+recursive search) input and song structure customization; it uses an
+N-gram-based language model (you can specify N!) to generate the lyrics, and
+outputs to stdout. There are a lot more cool features to come, being added
+faster than I can implement them to [`TODO.md`](/TODO.md)!
 
 ## Usage
 

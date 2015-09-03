@@ -29,7 +29,7 @@ def add_ngram_dict(accum_dict, add_dict, n):
     together properly. This mutates accum_dict but not add_dict.
     '''
     if n == 1: # At last level, dicts are Counters
-        accum_dict += add_dict
+        accum_dict.update(add_dict)
 
     else:
         for token, next_add in add_dict.iteritems():
